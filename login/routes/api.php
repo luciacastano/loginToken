@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LoginController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,17 +22,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 // ruta de autenticación
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login']);
 
 // ruta sin necesidad de estar logeado
-Route::get('/hello', function () { 
-    return response()->json(['message' => 'Estás dentro!!!']);
-});
+Route::get('/random', [LoginController::class, 'random']);
 
 // rutas para usuarios identificados
 Route::middleware(['checkLogin'])->group(function () {
-    Route::get('/userData', [AuthController::class, 'userData']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [LoginController::class, 'userData']);
+    Route::post('/logout', [LoginController::class, 'logout']);
 });
 
    

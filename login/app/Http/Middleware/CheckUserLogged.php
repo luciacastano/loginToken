@@ -17,32 +17,18 @@ class CheckUserLogged
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->is('api/login') || $request->is('api/hello')) {
-            return $next($request);
+        if (!Auth::guard(name: 'sanctum')->check()) {
+            // guard -> determinar la autentificación de usuarios
+            // guard'sanctum' -> autentificación por token
+
+            $response = [
+                'success' => false,
+                'message' => '¡ALTO! El usuario no está logeado',
+                'data' => null
+            ];
+            return response()->json($response);
         }
 
-        $userToken = $request->bearerToken(); // paso de token por postamn
-
-        if (!$userToken) {
-            return response()->json([
-                'status' => false,
-                'message' => 'El token no ha sido proporcionado.',
-            ], 401);
-        }
-
-        $validToken = DB::table('personal_access_tokens')->where('token', $userToken)->exists();
-
-        if ($validToken) {
-            $user = DB::table('personal_access_tokens')->where('token', $userToken)->value('tokenable_id');
-
-            Auth::onceUsingId($user); // para autentificarse por id, sin necesidad de contraseña
-
-            return $next($request);
-        }
-
-        return response()->json([
-            'status' => false,
-            'message' => 'El token proporcionado no es válido.',
-        ], 401);
+        return $next($request);
     }
 }
