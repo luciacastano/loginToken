@@ -2,40 +2,57 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    public function login(Request $request)
+    public function register(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required',
-            'password' => 'required'
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
         ]);
 
-        if (Auth::guard(name: 'sanctum')->check()) {
-            $response = [
-                'success' => true,
-                'message' => 'El usuario ya está logeado',
-                'data' => $data
-            ];
-            return response()->json($response); 
-
-        }else if (Auth::attempt($data)) {
-            return Auth::user()->createToken("token");
-        } 
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
 
         return response()->json([
+            'success' => true,
+            'message' => 'Usuario registrado correctamente',
+            'data' => $user,
+        ]);
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+    
+        if (Auth::attempt(['name' => $request->username, 'password' => $request->password]) ||
+            Auth::attempt(['email' => $request->username, 'password' => $request->password])) {
+    
+            $token = Auth::user()->createToken("accessToken")->accessToken;
+            return response()->json(['accessToken' => $token]);
+        }
+    
+        return response()->json([
             'success' => false,
-            'message' => 'El usuario no está logeado',
-            'data' => $data
+            'message' => 'Las credenciales son incorrectas',
         ]);
     }
 
     public function userData(Request $request)
     {
-        $user = Auth::guard('sanctum')->user();
+        $user = Auth::guard('api')->user();
     
         $response = [
             'success' => true,
@@ -48,7 +65,7 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        $user = Auth::guard(name: 'sanctum')->user();
+        $user = Auth::guard(name: 'api')->user();
         $user->tokens()->delete();
 
         $response = [

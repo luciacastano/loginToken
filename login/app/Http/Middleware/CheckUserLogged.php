@@ -23,7 +23,7 @@ class CheckUserLogged
 
             $response = [
                 'success' => false,
-                'message' => '¡ALTO! El usuario no está logeado',
+                'message' => '¡ALTO! El usuario no está logueado',
                 'data' => null
             ];
             return response()->json($response);

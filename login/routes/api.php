@@ -21,16 +21,25 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
+// ruta de registro
+Route::post('/register', [LoginController::class, 'register']);
+
 // ruta de autenticación
 Route::post('/login', [LoginController::class, 'login']);
 
 // ruta sin necesidad de estar logeado
 Route::get('/random', [LoginController::class, 'random']);
 
+
 // rutas para usuarios identificados
-Route::middleware(['checkLogin'])->group(function () {
+/*Route::middleware(['checkLogin'])->group(function () {
+    Route::get('/me', [LoginController::class, 'userData']);
+    Route::post('/logout', [LoginController::class, 'logout']);
+});*/
+
+// rutas para usuarios identificados con passport
+Route::middleware(['auth:api'])->group(function () {
     Route::get('/me', [LoginController::class, 'userData']);
     Route::post('/logout', [LoginController::class, 'logout']);
 });
 
-   
