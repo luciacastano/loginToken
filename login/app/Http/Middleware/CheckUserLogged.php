@@ -17,7 +17,7 @@ class CheckUserLogged
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::guard(name: 'sanctum')->check()) {
+        if (!Auth::guard(name: 'api')->check()) {
             // guard -> determinar la autentificación de usuarios
             // guard'sanctum' -> autentificación por token
 
